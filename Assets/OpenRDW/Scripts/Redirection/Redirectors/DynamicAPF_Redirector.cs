@@ -4,9 +4,29 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
 
 public class DynamicAPF_Redirector : APF_Redirector
 {
+    //추가 - 오브젝트별 가중치
+    public List<float> obstacleWeights =
+        new List<float>()
+        {
+            30.0f, // obstacle1
+            50.0f, // obstacle2
+            80.0f, // obstacle3
+            100.0f  // obstacle4
+        };
+    public Color[] obstacleColors =
+    {
+        Color.green,
+        Color.yellow,
+        new Color(1f, 0.5f, 0f),
+        Color.red
+    };
+
+
+
     //The physical space boundary or obstacle boundary is divided into small segments with a growth of no more than targetSegLength long for accumulation
     private static readonly float targetSegLength = 1;
 
@@ -47,7 +67,16 @@ public class DynamicAPF_Redirector : APF_Redirector
         //calculate total force by the formulas given by the paper
         var forceT = GetTotalForce(physicalSpaces, userTransforms);
         var gravitation = GetPrimarySteeringTargetDir(physicalSpaces, userTransforms) * 0.5f * forceT.magnitude;
-        var totalForce = (forceT + gravitation).normalized;
+
+
+        //float obstacleInfulence = 5f; 로 장애물로부터 밀어내는 force를 키움.
+        float obstacleInfluence = 5.0f;
+
+
+        //var totalForce = (forceT + gravitation).normalized;
+        var totalForce = (forceT * obstacleInfluence + gravitation).normalized;
+
+
 
         forceT = forceT.normalized;
         totalForce = totalForce.normalized;
@@ -369,14 +398,28 @@ public class DynamicAPF_Redirector : APF_Redirector
         SingleSpace space = physicalSpaces[userIndex];
         for (int i = 0; i < space.trackingSpace.Count; i++)
             w += GetW_Force(space.trackingSpace[i], space.trackingSpace[(i + 1) % space.trackingSpace.Count]);
-        foreach (var ob in space.obstaclePolygons)
+        //foreach (var ob in space.obstaclePolygons)
+        //{
+        //    for (int i = 0; i < ob.Count; i++)
+        //    {
+        //        //swap the positions because vertices of the obstacle is in counterclockwise order                
+        //        w += GetW_Force(ob[(i + 1) % ob.Count], ob[i]);
+        //    }
+        //}
+
+        //수정(Weight 반영해서 force 작용하도록)
+        for (int obIndex = 0; obIndex < space.obstaclePolygons.Count; obIndex++)
         {
+            var ob = space.obstaclePolygons[obIndex];
+
+            float riskWeight = obstacleWeights[obIndex];
+
             for (int i = 0; i < ob.Count; i++)
             {
-                //swap the positions because vertices of the obstacle is in counterclockwise order                
-                w += GetW_Force(ob[(i + 1) % ob.Count], ob[i]);
+                w += riskWeight * GetW_Force(ob[(i + 1) % ob.Count], ob[i]);
             }
         }
+
         foreach (var user in userTransforms)
         {
             if (user.GetComponent<MovementManager>().physicalSpaceIndex == userIndex)
@@ -384,6 +427,7 @@ public class DynamicAPF_Redirector : APF_Redirector
                 u += GetU_Force(user);
             }
         }
+
 
         t = w + u;
         return t;

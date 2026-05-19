@@ -1,0 +1,4 @@
+[LOG]: [FFmpegLib]: DEST URL: C:\Users\hbsss\OneDrive\Documents/RockVR/Video/2026-05-19-07-49-33-XXHTJ.mp4
+[LOG]: [FFmpegLib]: Build command: "D:/문서/RDW2/OpenRDW2/Assets/StreamingAssets/RockVR/FFmpeg/Windows/ffmpeg.exe" -f rawvideo -pix_fmt rgb24 -r 30 -s 756x410 -i - -y -preset ultrafast -pix_fmt yuv420p -vcodec libx264 -crf 18 -vf vflip -framerate 30 -tune zerolatency "C:\Users\hbsss\OneDrive\Documents/RockVR/Video/2026-05-19-07-49-33-XXHTJ.mp4"
+[ERROR]: [FFmpegLib]: Failed to CreateProcess
+[ERROR]: [FFmpegLib]: Failed to create ffmpeg process

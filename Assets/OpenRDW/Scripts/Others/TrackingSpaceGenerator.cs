@@ -627,33 +627,100 @@ public class TrackingSpaceGenerator
         mesh.RecalculateNormals();
         return mesh;
     }
-    public static void GenerateObstacleMesh(List<List<Vector2>> obstaclePolygons, Transform obstacleParent, Color obstacleColor, bool ifObstacleHasHeight, float obstacleHeight)
+    //    public static void GenerateObstacleMesh(List<List<Vector2>> obstaclePolygons, Transform obstacleParent, Color obstacleColor, bool ifObstacleHasHeight, float obstacleHeight)
+    //    {
+    //        int obstacleId = 0;
+    //        foreach (var obstaclePoints in obstaclePolygons)
+    //        {
+    //            var obstacleMesh = GeneratePolygonMesh(obstaclePoints);
+    //            var obstacle = new GameObject("obstacleId" + obstacleId);
+    //            obstacle.transform.SetParent(obstacleParent);
+    //            obstacle.transform.localPosition = Vector3.zero;
+    //            obstacle.transform.rotation = Quaternion.identity;
+
+    //            obstacle.AddComponent<MeshFilter>().mesh = obstacleMesh;
+    //            obstacle.AddComponent<MeshRenderer>().material.color = obstacleColor;
+
+    //            if (ifObstacleHasHeight)
+    //            {
+    //                var wallMesh = TrackingSpaceGenerator.GenerateWallMesh(obstaclePoints, obstacleHeight);
+    //                var wall = new GameObject("wall");
+    //                wall.transform.SetParent(obstacle.transform);
+    //                wall.transform.localPosition = Vector3.zero;
+    //                wall.transform.rotation = Quaternion.identity;
+
+    //                wall.AddComponent<MeshFilter>().mesh = wallMesh;
+    //                wall.AddComponent<MeshRenderer>().material.color = obstacleColor;
+    //                obstacle.transform.localPosition = Vector3.up * obstacleHeight;//rise obstacle
+    //            }
+    //            obstacleId++;
+    //        }
+    //    }
+    public static void GenerateObstacleMesh(
+        List<List<Vector2>> obstaclePolygons,
+        Transform obstacleParent,
+        Color obstacleColor,
+        bool ifObstacleHasHeight,
+        float obstacleHeight)
     {
         int obstacleId = 0;
+
+        Color[] obstacleColors =
+        {
+        Color.green,
+        Color.yellow,
+        new Color(1f, 0.5f, 0f),
+        Color.red
+        
+    };
+
         foreach (var obstaclePoints in obstaclePolygons)
         {
             var obstacleMesh = GeneratePolygonMesh(obstaclePoints);
+
             var obstacle = new GameObject("obstacleId" + obstacleId);
+
             obstacle.transform.SetParent(obstacleParent);
             obstacle.transform.localPosition = Vector3.zero;
             obstacle.transform.rotation = Quaternion.identity;
 
             obstacle.AddComponent<MeshFilter>().mesh = obstacleMesh;
-            obstacle.AddComponent<MeshRenderer>().material.color = obstacleColor;
+
+            // Renderer 추가
+            var renderer = obstacle.AddComponent<MeshRenderer>();
+
+            // obstacle마다 다른 색 적용
+            renderer.material.color =
+                obstacleColors[obstacleId % obstacleColors.Length];
 
             if (ifObstacleHasHeight)
             {
-                var wallMesh = TrackingSpaceGenerator.GenerateWallMesh(obstaclePoints, obstacleHeight);
+                var wallMesh =
+                    TrackingSpaceGenerator.GenerateWallMesh(
+                        obstaclePoints,
+                        obstacleHeight);
+
                 var wall = new GameObject("wall");
+
                 wall.transform.SetParent(obstacle.transform);
                 wall.transform.localPosition = Vector3.zero;
                 wall.transform.rotation = Quaternion.identity;
 
                 wall.AddComponent<MeshFilter>().mesh = wallMesh;
-                wall.AddComponent<MeshRenderer>().material.color = obstacleColor;
-                obstacle.transform.localPosition = Vector3.up * obstacleHeight;//rise obstacle
+
+                var wallRenderer =
+                    wall.AddComponent<MeshRenderer>();
+
+                // wall도 동일 색 적용
+                wallRenderer.material.color =
+                    obstacleColors[obstacleId % obstacleColors.Length];
+
+                obstacle.transform.localPosition =
+                    Vector3.up * obstacleHeight;
             }
+
             obstacleId++;
         }
     }
 }
+

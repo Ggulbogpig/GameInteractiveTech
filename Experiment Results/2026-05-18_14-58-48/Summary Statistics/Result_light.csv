@@ -1,0 +1,4 @@
+trial,endState,user,redirector,resetCount,virtualDistance,gtChangeMax,gcChangeMax,gtChangeAvg,gcChangeAvg
+0,Normal,0,SeparateSpace,80,396.5435,3.911776,8.666667,0.04433683,0.03811346
+0,Normal,1,SeparateSpace,80,396.5641,3.919802,2.666667,0.05352112,0.03191236
+0,Normal,2,SeparateSpace,80,396.6136,3.872742,8.666667,0.04767909,0.03833293
