@@ -2,6 +2,8 @@
 
 ## Overview
 
+<img width="426" height="240" alt="Image" src="https://github.com/user-attachments/assets/ea6bd8be-c5f4-4346-810e-f500250aa372" />
+
 본 프로젝트는 OpenRDW2를 기반으로 확장된 Semantic Risk-Aware Redirected Walking Framework를 구현한다.
 
 기존 APF 기반 Redirected Walking에 Semantic Risk Heatmap, Adaptive SGD Cue, Warning Sound 및 Risk-Aware Reset 전략을 추가하여 물리 공간 내 위험 요소를 고려한 안전한 RDW를 목표로 한다.
