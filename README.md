@@ -1,3 +1,319 @@
+# Custom Modifications (Semantic Risk-Aware RDW Framework)
+
+## Overview
+
+<img width="426" height="240" alt="Image" src="https://github.com/user-attachments/assets/ea6bd8be-c5f4-4346-810e-f500250aa372" />
+
+본 프로젝트는 OpenRDW2를 기반으로 확장된 Semantic Risk-Aware Redirected Walking Framework를 구현한다.
+
+기존 APF 기반 Redirected Walking에 Semantic Risk Heatmap, Adaptive SGD Cue, Warning Sound 및 Risk-Aware Reset 전략을 추가하여 물리 공간 내 위험 요소를 고려한 안전한 RDW를 목표로 한다.
+
+전체 파이프라인은 다음과 같다.
+
+```text
+Physical Space
+        ↓
+Semantic Obstacle Weighting
+        ↓
+Heatmap Generation
+        ↓
+Heatmap APF Redirector
+        ↓
+Steering Force Computation
+        ↓
+Adaptive SGD Cue
+        ↓
+Warning Sound
+        ↓
+R2G Reset
+```
+
+---
+
+# HeatmapAPF_Redirector
+
+**위치**
+
+```text
+Assets/OpenRDW/Scripts/Redirection/Redirectors/
+HeatmapAPF_Redirector.cs
+```
+
+기존 DynamicAPF_Redirector를 확장하여 Semantic Heatmap 기반 위험도 정보를 Redirection Force 계산에 반영하였다.
+
+## Risk Sources
+
+현재 위험도는 다음 요소를 기반으로 계산된다.
+
+* Physical Obstacles
+* Physical Walls (Tracking Space Boundary)
+
+## Obstacle Weights
+
+각 장애물에는 의미 기반 위험도 가중치를 부여한다.
+
+```csharp
+30
+50
+80
+100
+```
+
+가중치가 높을수록 충돌 시 위험도가 높다고 가정한다.
+
+## Wall Risk
+
+물리 공간 경계는 별도의 위험도를 가진다.
+
+```csharp
+wallWeight = 500
+```
+
+실험 환경에 따라 조정 가능하다.
+
+## Heatmap Force
+
+Heatmap의 Risk Gradient를 계산하여 위험도가 감소하는 방향으로 Steering Force를 생성한다.
+
+```text
+High Risk Area
+        ↓
+Strong Repulsive Force
+
+Low Risk Area
+        ↓
+Weak Force
+```
+
+---
+
+# HeatmapVisualizer
+
+**위치**
+
+```text
+Assets/OpenRDW/Scripts/Visualization/
+HeatmapVisualizer.cs
+```
+
+Semantic Heatmap을 시각화하기 위한 디버깅 도구이다.
+
+## 기능
+
+* Heatmap Grid 생성
+* Obstacle Risk 시각화
+* Wall Risk 시각화
+* Gaussian Risk Distribution 시각화
+
+## Color Mapping
+
+```text
+Blue
+ ↓
+Low Risk
+
+Red
+ ↓
+High Risk
+```
+
+## 참고
+
+HeatmapVisualizer는 시각화 전용이며 실제 Redirection 계산에는 직접 영향을 주지 않는다.
+
+---
+
+# Adaptive SGD System
+
+## SGD Cue
+
+사용자의 시선을 특정 방향으로 유도하기 위한 Visual Cue 시스템을 추가하였다.
+
+### UI 구조
+
+```text
+Canvas
+ ├ Left_Cue
+ └ Right_Cue
+```
+
+필요한 Steering 방향에 따라 좌측 또는 우측 Cue를 표시한다.
+
+### Trigger Condition
+
+```text
+turnNeed >= SGD Threshold
+```
+
+---
+
+# Warning Sound
+
+고위험 상황에서 추가적인 청각 자극을 제공한다.
+
+### Trigger Condition
+
+```text
+turnNeed >= Sound Threshold
+```
+
+### Audio Source
+
+```text
+Redirected Avatar
+ └ AudioSource
+```
+
+Warning Sound는 위험도가 감소하면 자동으로 종료된다.
+
+---
+
+# Multi-Level Redirection Strategy
+
+현재 시스템은 4단계 위험도 기반 Redirection 전략을 사용한다.
+
+## Level 1 - Low Risk
+
+```text
+Default APF Steering
+```
+
+기본 APF Steering만 수행한다.
+
+---
+
+## Level 2 - Medium Risk
+
+```text
+SGD Cue
+```
+
+시각적 SGD Cue를 활성화한다.
+
+---
+
+## Level 3 - High Risk
+
+```text
+SGD Cue
++
+Warning Sound
+```
+
+시각 및 청각 피드백을 동시에 제공한다.
+
+---
+
+## Level 4 - Very High Risk
+
+```text
+R2G Reset
+```
+
+Reset Threshold를 초과하면 Reset을 수행한다.
+
+---
+
+# R2G_Resetter
+
+**위치**
+
+```text
+Assets/OpenRDW/Scripts/Redirection/Resetters/
+R2G_Resetter.cs
+```
+
+현재 사용 중인 Reset 방식은 Reset-To-Gradient(R2G)이다.
+
+## Reset Strategy
+
+APF가 계산한 가장 안전한 방향으로 사용자를 회전시킨다.
+
+```text
+Reset-To-Gradient
+```
+
+## Reset Statistics
+
+실험 분석을 위해 Reset 횟수를 기록하도록 수정하였다.
+
+```csharp
+public static int resetCount;
+```
+
+Console 출력:
+
+```text
+R2G Reset Count = N
+```
+
+---
+
+# Experimental Pipeline
+
+현재 구현된 Semantic Risk-Aware RDW Framework의 전체 흐름은 다음과 같다.
+
+```text
+Physical Space
+        ↓
+Semantic Obstacle Weighting
+        ↓
+Risk Heatmap Generation
+        ↓
+Heatmap APF Redirector
+        ↓
+Steering Direction Calculation
+        ↓
+Adaptive SGD Cue
+        ↓
+Warning Sound
+        ↓
+R2G Reset
+```
+
+---
+
+# Future Work
+
+## Dynamic Semantic Risk Mapping
+
+현재는 정적 장애물만 고려한다.
+
+향후 Quest 3 Passthrough Camera와 Object Detection 모델을 활용하여 동적 객체를 실시간으로 위험도 계산에 반영할 계획이다.
+
+```text
+Quest 3 Passthrough Camera
+        ↓
+YOLO / Object Detection
+        ↓
+Dynamic Object Detection
+        ↓
+Semantic Risk Assignment
+        ↓
+Dynamic Heatmap Update
+        ↓
+Risk-Aware RDW
+```
+
+---
+
+## MonoScene Integration
+
+향후 MonoScene 기반 Semantic Scene Completion을 통해 자동 환경 인식 기능을 추가할 예정이다.
+
+```text
+Quest Camera
+        ↓
+MonoScene
+        ↓
+3D Semantic Occupancy Map
+        ↓
+2D Risk Map Projection
+        ↓
+OpenRDW Integration
+```
+
+이를 통해 사전 정의되지 않은 물리 환경에서도 자동으로 Semantic Risk Map을 생성할 수 있다.
 
 
 ## <center>OpenRDW 2: A Redirected Walking Evaluation Toolkit Supporting Multi-user online VR</center>
