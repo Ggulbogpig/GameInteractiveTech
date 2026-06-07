@@ -18,6 +18,8 @@ public class R2G_Resetter : Resetter
 
     APF_Redirector redirector;
 
+    public static int resetCount = 0;
+
     public override bool IsResetRequired()
     {
         return IfCollisionHappens();
@@ -25,6 +27,14 @@ public class R2G_Resetter : Resetter
 
     public override void InitializeReset()
     {
+        //추가
+        resetCount++;
+
+        Debug.Log(
+            "R2G Reset Count = "
+            + resetCount);
+
+
         var redirectorTmp = redirectionManager.redirector;
         var currPos = Utilities.FlattenedPos2D(redirectionManager.currPosReal);
         targetPos = DecideResetPosition(currPos);

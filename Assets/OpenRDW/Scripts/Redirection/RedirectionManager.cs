@@ -9,7 +9,7 @@ public class RedirectionManager : MonoBehaviour
     const float EPS = 1e-5f;
     public static readonly float MaxSamePosTime = 50;//the max time(in seconds) the avatar can stand on the same position, exceeds this value will make data invalid (stuck in one place)
 
-    public enum RedirectorChoice { None, S2C, S2O, Zigzag, ThomasAPF, MessingerAPF, DynamicAPF, DeepLearning, PassiveHapticAPF, SeparateSpace };
+    public enum RedirectorChoice { None, S2C, S2O, Zigzag, ThomasAPF, MessingerAPF, DynamicAPF, DeepLearning, PassiveHapticAPF, SeparateSpace, HeatmapAPF, RANav };
     public enum ResetterChoice { None, TwoOneTurn, FreezeTurn, MR2C, R2G, SFR2G, SeparateSpace };
 
     [HideInInspector]
@@ -188,6 +188,13 @@ public class RedirectionManager : MonoBehaviour
                 return typeof(PassiveHapticAPF_Redirector);
             case RedirectorChoice.SeparateSpace:
                 return typeof(SeparateSpace_Redirector);
+            //추가
+            case RedirectorChoice.HeatmapAPF:
+                return typeof(HeatmapAPF_Redirector);
+            //추가
+            case RedirectorChoice.RANav:
+                return typeof(RANav_Redirector);
+
         }
         return typeof(NullRedirector);
     }
@@ -213,6 +220,10 @@ public class RedirectionManager : MonoBehaviour
             return RedirectorChoice.PassiveHapticAPF;
         else if (redirector.Equals(typeof(SeparateSpace_Redirector)))
             return RedirectorChoice.SeparateSpace;
+        else if (redirector.Equals(typeof(HeatmapAPF_Redirector)))
+            return RedirectorChoice.HeatmapAPF;
+        else if (redirector.Equals(typeof(RANav_Redirector)))
+            return RedirectorChoice.RANav;
         return RedirectorChoice.None;
     }
     public static System.Type DecodeRedirector(string s)
@@ -239,6 +250,10 @@ public class RedirectionManager : MonoBehaviour
                 return typeof(PassiveHapticAPF_Redirector);
             case "separatespace":
                 return typeof(SeparateSpace_Redirector);
+            case "heatmapapf":
+                return typeof(HeatmapAPF_Redirector);
+            case "ranav":
+                return typeof(RANav_Redirector);
             default:
                 return typeof(NullRedirector);
         }

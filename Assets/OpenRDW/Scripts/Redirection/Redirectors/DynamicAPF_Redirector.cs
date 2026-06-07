@@ -12,10 +12,10 @@ public class DynamicAPF_Redirector : APF_Redirector
     public List<float> obstacleWeights =
         new List<float>()
         {
-            30.0f, // obstacle1
-            50.0f, // obstacle2
-            80.0f, // obstacle3
-            100.0f  // obstacle4
+            20.0f, // obstacle1
+            40.0f, // obstacle2
+            60.0f, // obstacle3
+            80.0f  // obstacle4
         };
     public Color[] obstacleColors =
     {
@@ -24,6 +24,7 @@ public class DynamicAPF_Redirector : APF_Redirector
         new Color(1f, 0.5f, 0f),
         Color.red
     };
+    public float wallWeight = 500.0f;
 
 
 
@@ -397,15 +398,8 @@ public class DynamicAPF_Redirector : APF_Redirector
         int userIndex = movementManager.physicalSpaceIndex; // we only consider the space where the current user's at
         SingleSpace space = physicalSpaces[userIndex];
         for (int i = 0; i < space.trackingSpace.Count; i++)
-            w += GetW_Force(space.trackingSpace[i], space.trackingSpace[(i + 1) % space.trackingSpace.Count]);
-        //foreach (var ob in space.obstaclePolygons)
-        //{
-        //    for (int i = 0; i < ob.Count; i++)
-        //    {
-        //        //swap the positions because vertices of the obstacle is in counterclockwise order                
-        //        w += GetW_Force(ob[(i + 1) % ob.Count], ob[i]);
-        //    }
-        //}
+            w += wallWeight*GetW_Force(space.trackingSpace[i], space.trackingSpace[(i + 1) % space.trackingSpace.Count]);
+
 
         //수정(Weight 반영해서 force 작용하도록)
         for (int obIndex = 0; obIndex < space.obstaclePolygons.Count; obIndex++)

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 11f27fbc853c63c4cbcaa0b1e133d047
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - globalConfiguration: {instanceID: 0}
+  - redirectionManager: {instanceID: 0}
+  - movementManager: {instanceID: 0}
+  - visualizationManager: {instanceID: 0}
+  - totalForcePointer: {instanceID: 0}
+  - saccadeCue: {fileID: 2194791648448938447, guid: 900594d7806ea5a4d9961cff67aef07f,
+      type: 3}
+  - warningAudio: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
