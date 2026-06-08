@@ -354,6 +354,9 @@ public class HeatmapAPF_Redirector : DynamicAPF_Redirector
 
         //추가
         UpdateTotalForcePointer(totalForce);
+        //Debug.Log(
+        //    "HeatmapForce Magnitude = "
+        //    + heatmapForce.magnitude);
 
         ApplyRedirectionByForce(totalForce, physicalSpaces);
     }
@@ -525,8 +528,11 @@ public class HeatmapAPF_Redirector : DynamicAPF_Redirector
                     ob);
 
             float semanticWeight =
-                obstacleWeights
-                [obIndex];
+                (obIndex < obstacleWeights.Count)
+                    ? obstacleWeights[obIndex]
+                    : 100f;
+
+
 
             risk +=
                 semanticWeight

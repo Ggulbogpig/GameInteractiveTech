@@ -406,7 +406,22 @@ public class DynamicAPF_Redirector : APF_Redirector
         {
             var ob = space.obstaclePolygons[obIndex];
 
-            float riskWeight = obstacleWeights[obIndex];
+            Debug.Log(
+                "Obstacle Count = "
+                + space.obstaclePolygons.Count);
+
+            Debug.Log(
+                "Weight Count = "
+                + obstacleWeights.Count);
+
+            Debug.Log(
+                "Current Index = "
+                + obIndex);
+
+            //float riskWeight = obstacleWeights[obIndex];
+            float riskWeight =
+                obIndex < obstacleWeights.Count
+                    ? obstacleWeights[obIndex]: 100f;
 
             for (int i = 0; i < ob.Count; i++)
             {

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using UnityEngine;
 
@@ -17,8 +18,41 @@ public class DynamicObstacleReceiver : MonoBehaviour
 
     GameObject personCube;
 
+    private GlobalConfiguration gc;
+
+    private int dynamicObstacleIndex = -1;
+
+    //private DynamicAPF_Redirector apfRedirector;
+    private RedirectionManager redirectionManager;
+    //private HeatmapAPF_Redirector heatmapRedirector;
+
     void Start()
     {
+        gc = FindObjectOfType<GlobalConfiguration>();
+        redirectionManager = FindObjectOfType<RedirectionManager>();
+        //heatmapRedirector =
+            FindObjectOfType<HeatmapAPF_Redirector>();
+
+        //Debug.Log(
+        //    "Heatmap Redirector = "
+        //    + heatmapRedirector);
+
+        //if (redirectionManager != null)
+        //{
+        //    apfRedirector =
+        //        redirectionManager.redirector
+        //        as DynamicAPF_Redirector;
+        //}
+
+        Debug.Log("RedirectionManager = " + redirectionManager);
+        Debug.Log("Actual Redirector = " + redirectionManager.redirector);
+        //Debug.Log("APF Redirector = " + apfRedirector);
+
+        Debug.Log("GC = " + gc);
+        //apfRedirector =
+            FindObjectOfType<DynamicAPF_Redirector>();
+
+
         try
         {
             client = new TcpClient("127.0.0.1", 9999);
@@ -31,7 +65,71 @@ public class DynamicObstacleReceiver : MonoBehaviour
             Debug.LogError("Connection Failed : " + e.Message);
         }
     }
+    void UpdateDynamicObstacle()
+    {
+        if (gc == null)
+            return;
 
+        var space =
+            gc.physicalSpaces[0];
+
+        Vector3 p =
+            personCube.transform.position;
+
+        float halfSize = 0.3f;
+
+        List<Vector2> poly =
+            new List<Vector2>()
+        {
+        new Vector2(
+            p.x-halfSize,
+            p.z-halfSize),
+
+        new Vector2(
+            p.x+halfSize,
+            p.z-halfSize),
+
+        new Vector2(
+            p.x+halfSize,
+            p.z+halfSize),
+
+        new Vector2(
+            p.x-halfSize,
+            p.z+halfSize)
+        };
+        if (dynamicObstacleIndex < 0)
+        {
+            dynamicObstacleIndex =
+                space.obstaclePolygons.Count;
+
+            space.obstaclePolygons.Add(poly);
+            Debug.Log(
+                "After Add Polygon = "
+                + space.obstaclePolygons.Count);
+
+            //if (heatmapRedirector != null)
+            //{
+            //    heatmapRedirector.obstacleWeights.Add(100f);
+
+            //    Debug.Log(
+            //        "After Add Polygon = " + space.obstaclePolygons.Count
+            //        + " / Heatmap Weight = " + heatmapRedirector.obstacleWeights.Count);
+            //}
+            //else
+            //{
+            //    Debug.LogError("Heatmap Redirector is null");
+            //}
+            //Debug.Log(
+            //    "After Add Weight = "
+            //    + apfRedirector.obstacleWeights.Count);
+        }
+        else
+        {
+            space.obstaclePolygons[
+                dynamicObstacleIndex]
+                = poly;
+        }
+    }
     void Update()
     {
         if (client == null)
@@ -58,6 +156,8 @@ public class DynamicObstacleReceiver : MonoBehaviour
                 float z = 2.0f;
 
                 personCube.transform.position = new Vector3(x, 0.5f, z);
+
+                UpdateDynamicObstacle();
             }
         }
     }

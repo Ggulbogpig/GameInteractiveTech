@@ -77,9 +77,11 @@ public class HeatmapVisualizer : MonoBehaviour
 
         GenerateGrid();
         UpdateHeatmap();
-        //StartCoroutine(HeatmapLoop());
+        StartCoroutine(HeatmapLoop());
 
         Debug.Log("HEATMAP DONE");
+
+
     }
 
 
@@ -222,19 +224,19 @@ public class HeatmapVisualizer : MonoBehaviour
 
     }
 
-    //IEnumerator HeatmapLoop()
-    //{
-    //    while (true)
-    //    {
-    //        if (space != null)
-    //        {
-    //            UpdateHeatmap();
-    //        }
+    IEnumerator HeatmapLoop()
+    {
+        while (true)
+        {
+            if (space != null)
+            {
+                UpdateHeatmap();
+            }
 
-    //        yield return
-    //            new WaitForSeconds(0.2f);
-    //    }
-    //}
+            yield return
+                new WaitForSeconds(0.2f);
+        }
+    }
 
     //float ComputeRisk(Vector2 pos)
     //{
@@ -317,8 +319,9 @@ public class HeatmapVisualizer : MonoBehaviour
                     ob);
 
             float semanticWeight =
-                obstacleWeights
-                [obIndex];
+            (obIndex < obstacleWeights.Count)
+            ? obstacleWeights[obIndex]
+            : 100f;
 
             risk +=
                 semanticWeight *
