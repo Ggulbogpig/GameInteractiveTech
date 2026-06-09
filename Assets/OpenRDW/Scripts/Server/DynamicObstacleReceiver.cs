@@ -7,8 +7,10 @@ using UnityEngine;
 public class Detection
 {
     public string className;
-    public float cx;
-    public float cy;
+    public float x;
+    public float z;
+    public float vx;
+    public float vz;
 }
 
 public class DynamicObstacleReceiver : MonoBehaviour
@@ -24,47 +26,94 @@ public class DynamicObstacleReceiver : MonoBehaviour
 
     //private DynamicAPF_Redirector apfRedirector;
     private RedirectionManager redirectionManager;
-    //private HeatmapAPF_Redirector heatmapRedirector;
+    private HeatmapAPF_Redirector heatmapAPF;
+
+
 
     void Start()
     {
         gc = FindObjectOfType<GlobalConfiguration>();
-        redirectionManager = FindObjectOfType<RedirectionManager>();
-        //heatmapRedirector =
-            FindObjectOfType<HeatmapAPF_Redirector>();
 
-        //Debug.Log(
-        //    "Heatmap Redirector = "
-        //    + heatmapRedirector);
+        redirectionManager =
+            FindObjectOfType<RedirectionManager>();
 
-        //if (redirectionManager != null)
-        //{
-        //    apfRedirector =
-        //        redirectionManager.redirector
-        //        as DynamicAPF_Redirector;
-        //}
+        if (redirectionManager != null)
+        {
+            heatmapAPF =
+                redirectionManager.redirector
+                as HeatmapAPF_Redirector;
+        }
 
-        Debug.Log("RedirectionManager = " + redirectionManager);
-        Debug.Log("Actual Redirector = " + redirectionManager.redirector);
-        //Debug.Log("APF Redirector = " + apfRedirector);
+        Debug.Log(
+            "RedirectionManager = "
+            + redirectionManager);
 
-        Debug.Log("GC = " + gc);
-        //apfRedirector =
-            FindObjectOfType<DynamicAPF_Redirector>();
+        Debug.Log(
+            "Actual Redirector = "
+            + redirectionManager.redirector);
 
+        Debug.Log(
+            "HeatmapAPF = "
+            + heatmapAPF);
+
+        Debug.Log(
+            "GC = "
+            + gc);
 
         try
         {
-            client = new TcpClient("127.0.0.1", 9999);
-            reader = new StreamReader(client.GetStream());
+            client =
+                new TcpClient(
+                    "127.0.0.1",
+                    9999);
 
-            Debug.Log("Connected To YOLO");
+            reader =
+                new StreamReader(
+                    client.GetStream());
+
+            Debug.Log(
+                "Connected To YOLO");
         }
         catch (System.Exception e)
         {
-            Debug.LogError("Connection Failed : " + e.Message);
+            Debug.LogError(
+                "Connection Failed : "
+                + e.Message);
         }
     }
+
+    //void Start()
+    //{
+    //    gc = FindObjectOfType<GlobalConfiguration>();
+    //    redirectionManager = FindObjectOfType<RedirectionManager>();
+
+
+    //    //heatmapRedirector =
+    //    FindObjectOfType<HeatmapAPF_Redirector>();
+
+
+
+    //    Debug.Log("RedirectionManager = " + redirectionManager);
+    //    Debug.Log("Actual Redirector = " + redirectionManager.redirector);
+    //    //Debug.Log("APF Redirector = " + apfRedirector);
+
+    //    Debug.Log("GC = " + gc);
+    //    //apfRedirector =
+    //        FindObjectOfType<DynamicAPF_Redirector>();
+
+
+    //    try
+    //    {
+    //        client = new TcpClient("127.0.0.1", 9999);
+    //        reader = new StreamReader(client.GetStream());
+
+    //        Debug.Log("Connected To YOLO");
+    //    }
+    //    catch (System.Exception e)
+    //    {
+    //        Debug.LogError("Connection Failed : " + e.Message);
+    //    }
+    //}
     void UpdateDynamicObstacle()
     {
         if (gc == null)
@@ -141,26 +190,104 @@ public class DynamicObstacleReceiver : MonoBehaviour
 
             Debug.Log("YOLO = " + msg);
 
-            Detection det = JsonUtility.FromJson<Detection>(msg);
+            Detection det =
+                JsonUtility.FromJson<Detection>(msg);
 
             if (det.className == "person")
             {
                 if (personCube == null)
                 {
-                    personCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    personCube.name = "Dynamic_Person_Obstacle";
-                    personCube.transform.localScale = new Vector3(0.4f, 1.0f, 0.4f);
+                    personCube =
+                        GameObject.CreatePrimitive(
+                            PrimitiveType.Cube);
+
+                    personCube.name =
+                        "Dynamic_Person_Obstacle";
+
+                    personCube.transform.localScale =
+                        new Vector3(
+                            0.4f,
+                            1.0f,
+                            0.4f);
                 }
 
-                float x = (det.cx - 320f) / 100f;
-                float z = 2.0f;
+                //----------------------------------
+                // 실제 월드 좌표 사용
+                //----------------------------------
 
-                personCube.transform.position = new Vector3(x, 0.5f, z);
+                Vector2 pos =
+                    new Vector2(
+                        det.x,
+                        det.z);
+
+                Vector2 vel =
+                    new Vector2(
+                        det.vx,
+                        det.vz);
+
+                personCube.transform.position =
+                    new Vector3(
+                        det.x,
+                        0.5f,
+                        det.z);
+
+                //----------------------------------
+                // Heatmap APF에 전달
+                //----------------------------------
+
+                if (heatmapAPF != null)
+                {
+                    heatmapAPF.SetDynamicObstacle(
+                        pos,
+                        vel,
+                        150f);
+                }
+
+                //----------------------------------
+                // 기존 Polygon 갱신
+                //----------------------------------
 
                 UpdateDynamicObstacle();
             }
         }
     }
+
+    //void Update()
+    //{
+    //    if (client == null)
+    //        return;
+
+    //    if (client.Available > 0)
+    //    {
+    //        string msg = reader.ReadLine();
+
+    //        Debug.Log("YOLO = " + msg);
+
+    //        Detection det = JsonUtility.FromJson<Detection>(msg);
+
+    //        if (det.className == "person")
+    //        {
+    //            if (personCube == null)
+    //            {
+    //                personCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+    //                personCube.name = "Dynamic_Person_Obstacle";
+    //                personCube.transform.localScale = new Vector3(0.4f, 1.0f, 0.4f);
+    //            }
+
+    //            //float x = (det.cx - 320f) / 100f;
+    //            //float z = 2.0f;
+    //            Vector2 pos =
+    //                new Vector2(det.x, det.z);
+
+    //            Vector2 vel =
+    //                new Vector2(det.vx, det.vz);
+
+    //            personCube.transform.position = new Vector3(x, 0.5f, z);
+
+    //            UpdateDynamicObstacle();
+    //        }
+    //    }
+    //}
 
     void OnApplicationQuit()
     {

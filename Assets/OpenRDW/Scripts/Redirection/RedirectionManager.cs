@@ -124,6 +124,12 @@ public class RedirectionManager : MonoBehaviour
         movementManager = this.gameObject.GetComponent<MovementManager>();
 
         GetRedirector();
+        //    // 기존: GetRedirector();
+        // 변경: 현재 타입과 다르면 해당 타입으로 교체(또는 새로 추가)
+        if (redirector == null || redirector.GetType() != redirectorType)
+        {
+            UpdateRedirector(redirectorType);
+        }
         GetResetter();
 
         trailDrawer = GetComponent<TrailDrawer>();

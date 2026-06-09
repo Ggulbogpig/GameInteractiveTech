@@ -33,6 +33,22 @@ public class HeatmapAPF_Redirector : DynamicAPF_Redirector
 
     private bool resetRequested = false;
 
+    //동적 장애물 가중치 추가
+    [System.Serializable]
+    public class DynamicObstacle
+    {
+        public Vector2 position;
+        public Vector2 velocity;
+        public float weight;
+        public float radius;
+    }
+
+    public List<DynamicObstacle> dynamicObstacles =
+        new List<DynamicObstacle>();
+
+    public float dynamicK1 = 1.5f;
+    public float dynamicRiskScale = 1.0f;
+
 
     IEnumerator TriggerSGD()
     {
@@ -162,6 +178,29 @@ public class HeatmapAPF_Redirector : DynamicAPF_Redirector
         rightFlash.SetActive(false);
     }
 
+    public void SetDynamicObstacle(
+    Vector2 pos,
+    Vector2 vel,
+    float weight)
+    {
+        if (dynamicObstacles.Count == 0)
+        {
+            dynamicObstacles.Add(
+                new DynamicObstacle()
+                {
+                    position = pos,
+                    velocity = vel,
+                    weight = weight,
+                    radius = 0.4f
+                });
+        }
+        else
+        {
+            dynamicObstacles[0].position = pos;
+            dynamicObstacles[0].velocity = vel;
+            dynamicObstacles[0].weight = weight;
+        }
+    }
 
     //void Awake()
     //{
@@ -594,6 +633,37 @@ public class HeatmapAPF_Redirector : DynamicAPF_Redirector
                         riskSigma
                     )
                 );
+        }
+        //동적 장애물 위험도 추가
+        foreach (var dyn in dynamicObstacles)
+        {
+            Vector2 r =
+                pos - dyn.position;
+
+            float dist =
+                Mathf.Max(
+                    r.magnitude,
+                    0.2f);
+
+            Vector2 rDir =
+                r.normalized;
+
+            float approach =
+                Vector2.Dot(
+                    dyn.velocity,
+                    rDir);
+
+            float dynamicRisk =
+                dyn.weight
+                *
+                dynamicRiskScale
+                *
+                (1f / (dist * dist))
+                *
+                Mathf.Exp(
+                    dynamicK1 * approach);
+
+            risk += dynamicRisk;
         }
 
         return risk;
